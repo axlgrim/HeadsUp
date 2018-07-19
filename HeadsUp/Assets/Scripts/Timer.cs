@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,7 +10,18 @@ public class Timer : MonoBehaviour
 
     public TextMeshProUGUI TimerText;
     public bool IsPaused = false;
-    private float _time;
+    public float _time;
+    public float N = 0.0f;
+    public event Action<Timer> OnTimeElapsed;
+
+    private float _countdown;
+    public float reset_t = 0.0f;
+
+    void Awake()
+    {
+        var textAsset = Resources.Load<TextAsset>("Config");
+        _countdown = Convert.ToInt32(textAsset.text);
+    }
     // Use this for initialization
     void Start()
     {
@@ -21,16 +32,21 @@ public class Timer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (IsPaused)
+
+        float t = Time.timeSinceLevelLoad - _time - reset_t - N;
+        if ((t % 60) > _countdown)
         {
-
+            if (OnTimeElapsed != null)
+            {
+                OnTimeElapsed(this);
+            }
+            reset_t += 30;
         }
-        float t = Time.timeSinceLevelLoad - _time;
 
-        string minutes = ((int)t / 60).ToString();
+
         string seconds = (t % 60).ToString("f2");
 
-        TimerText.text = minutes + ":" + seconds;
+        TimerText.text = seconds;
 
     }
 }
