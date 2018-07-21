@@ -16,24 +16,26 @@ public class GameManger : MonoBehaviour {
 
 
     private Animator animator;
-    public int _scroreGuessed = 0;
-    public int _scroreSkipped = 0;
-    public bool _guessed = false;
-    public bool _skipped = false;
+    private int _scroreGuessed = 0;
+    private int _scroreSkipped = 0;
+
+    public bool Guessed = false;
+    public bool Skipped = false;
     public bool gyro_enabled = false;
+
     public TextMeshProUGUI ScoreText;
     public TextMeshProUGUI SkippededText;
     public TextMeshProUGUI WordToGuess;
+
     public GameObject CorrectImage;
     public GameObject WrongImage;
     public GameObject Canvas;
 
 
     private string _jsonfile;
-    private string path;
-    private float _countdown;
+    private string _path;
     private int _wordCounter = 0;
-    private Timer timer;
+    private Timer _timer;
     private bool _endGame = false;
 
     private WordData Words;
@@ -44,10 +46,10 @@ public class GameManger : MonoBehaviour {
 	void Start () 
     {
         
-        timer = FindObjectOfType<Timer>();
-        Subcribe(timer);
-        path = Application.streamingAssetsPath + "/Config.json";
-        _jsonfile = File.ReadAllText(path);
+        _timer = FindObjectOfType<Timer>();
+        Subcribe(_timer);
+        _path = Application.streamingAssetsPath + "/Config.json";
+        _jsonfile = File.ReadAllText(_path);
 
         WrongImage.SetActive(false);
         CorrectImage.SetActive(false);
@@ -83,12 +85,7 @@ public class GameManger : MonoBehaviour {
                 CheckSkipped();
                 CheckDefault();
             }
-
         }
-
-
-
-		
 	}
 
     private void EnableGyro()
@@ -103,65 +100,54 @@ public class GameManger : MonoBehaviour {
 
     private void CheckGuess()
     {
-        if(Math.Abs(_gyro.attitude.y) > 0.8f && !_guessed)
+        if(Math.Abs(_gyro.attitude.y) > 0.8f && !Guessed)
         {
             
             _scroreGuessed += 1;
-            _guessed = true;
+            Guessed = true;
 
             ScoreText.text = _scroreGuessed.ToString();
 
-            timer.N = Time.timeSinceLevelLoad;
+            _timer.N = Time.timeSinceLevelLoad;
             if(img == null)
             {
                 
                 img = Instantiate(CorrectImage, CorrectImage.transform) as GameObject;
                 img.transform.SetParent(Canvas.transform);
-
                 img.SetActive(true);
             }
             animator.SetTrigger("Correct");
             Destroy(img, 1f);
             ChangeWord();
-
         }
-
     }
 
     private void CheckSkipped()
     {
-        if (Math.Abs(_gyro.attitude.y) < 0.5f && !_skipped)
+        if (Math.Abs(_gyro.attitude.y) < 0.5f && !Skipped)
         {
             _scroreSkipped += 1;
             SkippededText.text = _scroreSkipped.ToString();
-            _skipped = true;
-
+            Skipped = true;
             if (img == null)
             {
-
                 img = Instantiate(WrongImage, WrongImage.transform) as GameObject;
                 img.transform.SetParent(Canvas.transform);
-
                 img.SetActive(true);
             }
             animator.SetTrigger("Wrong");
             Destroy(img, 1f);
-
-
-            timer.N = Time.timeSinceLevelLoad;
+            _timer.N = Time.timeSinceLevelLoad;
             ChangeWord();
         }
-
-
     }
     private void CheckDefault()
     {
         Debug.Log(_gyro.attitude);
         if (Math.Abs(_gyro.attitude.y) <= 0.8f && Math.Abs(_gyro.attitude.y) >= 0.5f)
         {
-            Debug.Log("Cleared");
-            _guessed = false;
-            _skipped = false;
+            Guessed = false;
+            Skipped = false;
 
         }
     }
@@ -240,7 +226,7 @@ public class GameManger : MonoBehaviour {
 
     private void EndGame()
     {
-        Destroy(timer);
+        Destroy(_timer);
         _endGame = true;
         EndPanel.SetActive(true);
 
